@@ -1,0 +1,10 @@
+node_modules
+dist
+
+.env
+.vercel
+*.md
+scripts
+
+test.ts
+.vscode

@@ -1,6 +1,5 @@
 import { logger } from "./app/utils/logger";
 import { connectMongoose } from "./app/lib/connectMongoose";
-import { seedAdmin } from "./app/utils/seedAdmin";
 // import { httpServer } from "./web-socket";
 import { envVars } from "./app/config/env";
 import { app } from "./app";
@@ -21,7 +20,6 @@ const startServer = async () => {
 
 (async () => {
   await startServer();
-  await seedAdmin();
 })();
 
 const graceFullyShutDown = () => {

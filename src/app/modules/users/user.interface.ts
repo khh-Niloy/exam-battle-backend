@@ -1,6 +1,7 @@
 export enum Roles {
   FREE = "FREE",
   PREMIUM = "PREMIUM",
+  ADMIN = "ADMIN",
 }
 
 export enum StudentGroup {

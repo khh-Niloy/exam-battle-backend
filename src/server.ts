@@ -1,11 +1,14 @@
 import { logger } from "./app/utils/logger";
 import { connectMongoose } from "./app/lib/connectMongoose";
-// import { httpServer } from "./web-socket";
 import { envVars } from "./app/config/env";
 import { app } from "./app";
 import { createServer } from "http";
 
 export const httpServer = createServer(app);
+
+// Initialize Socket.IO
+import { initWebSocket } from "./app/modules/battle/battle.websocket";
+initWebSocket(httpServer);
 
 const startServer = async () => {
   try {

@@ -48,6 +48,10 @@ export const initWebSocket = (httpServer: any) => {
       },
     );
 
+    socket.on("update_arena", (data) => {
+      io.to(data.battleRoomId).emit("arena_updated", data);
+    });
+
     socket.on("disconnect", () => {
       console.log("Client disconnected");
     });

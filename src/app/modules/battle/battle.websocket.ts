@@ -9,6 +9,8 @@ export const initWebSocket = (httpServer: any) => {
     },
   });
 
+  const roomReadyStatus: Record<string, Set<string>> = {};
+
   io.on("connection", (socket) => {
     socket.on("join_self", (userId: string) => {
       socket.join(userId);
@@ -50,6 +52,28 @@ export const initWebSocket = (httpServer: any) => {
 
     socket.on("update_arena", (data) => {
       io.to(data.battleRoomId).emit("arena_updated", data);
+    });
+
+    // Ready Status Logic
+
+    socket.on("player_ready", (data: { battleRoomId: string; userId: string }) => {
+      const { battleRoomId, userId } = data;
+
+      if (!roomReadyStatus[battleRoomId]) {
+        roomReadyStatus[battleRoomId] = new Set();
+      }
+
+      roomReadyStatus[battleRoomId].add(userId);
+
+      // Notify others in room
+      socket.to(battleRoomId).emit("opponent_ready", { userId });
+
+      // Check if 2 players are ready
+      if (roomReadyStatus[battleRoomId].size >= 2) {
+        io.to(battleRoomId).emit("battle_start", { battleRoomId });
+        // Cleanup
+        delete roomReadyStatus[battleRoomId];
+      }
     });
 
     socket.on("disconnect", () => {

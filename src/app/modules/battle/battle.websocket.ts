@@ -76,6 +76,17 @@ export const initWebSocket = (httpServer: any) => {
       }
     });
 
+    socket.on("player_unready", (data: { battleRoomId: string; userId: string }) => {
+      const { battleRoomId, userId } = data;
+
+      if (roomReadyStatus[battleRoomId]) {
+        roomReadyStatus[battleRoomId].delete(userId);
+
+        // Notify others
+        socket.to(battleRoomId).emit("opponent_unready", { userId });
+      }
+    });
+
     socket.on("disconnect", () => {
       console.log("Client disconnected");
     });

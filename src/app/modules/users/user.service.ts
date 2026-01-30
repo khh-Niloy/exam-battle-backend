@@ -15,9 +15,14 @@ const createUserService = async (playLoad: Partial<IUser>) => {
     throw new Error("User already exist");
   }
 
+  const hashedPassword = await bcryptjs.hash(
+    password as string,
+    Number(envVars.BCRYPT_SALT_ROUND),
+  );
+
   const userData = {
     email: userEmail,
-    password: password,
+    password: hashedPassword,
     ...rest,
   };
 

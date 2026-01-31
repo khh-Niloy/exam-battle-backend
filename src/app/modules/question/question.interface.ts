@@ -5,4 +5,5 @@ export interface IQuestion {
   options: string[];
   correctIndex: number;
   questionPaperId: Types.ObjectId;
+  explanation?: string;
 }

@@ -22,3 +22,8 @@
 18. [DEBUG] Verified `getQuestionPaperById` correctly returns populated questions. Added console logs in `BattlePage` to confirm.
 19. [UPDATE] Pushed changes (Question API, Data Persistence Fix, Debug Logs) to `dev-os`.
 20. [INFO] Relocated `tracker.md` to `exam-battle-backend` directory as requested.
+
+01 February 2026
+
+21. [UPDATE] Added `explanation` field to `Question` model and interface.
+22. [ADD] Created and executed `scripts/backfill-explanation.ts` to populate demo explanations for existing questions.

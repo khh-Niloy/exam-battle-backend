@@ -23,6 +23,10 @@ const questionSchema = new Schema<IQuestion>(
       ref: "QuestionPaper",
       required: true,
     },
+    explanation: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true, versionKey: false },
 );

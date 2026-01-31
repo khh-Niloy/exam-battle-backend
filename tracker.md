@@ -27,3 +27,5 @@
 
 21. [UPDATE] Added `explanation` field to `Question` model and interface.
 22. [ADD] Created and executed `scripts/backfill-explanation.ts` to populate demo explanations for existing questions.
+23. [FIX] Resolved frontend route conflict by removing duplicate `app/battle/[battleId]` directory.
+24. [UPDATE] Updated `BattlePage` (`[battleRoomId]`) to display question explanations after the battle is finished.

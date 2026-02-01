@@ -1,8 +1,18 @@
 import { Types } from "mongoose";
 
+export interface IBattleParticipant {
+  userId: Types.ObjectId;
+  score: number;
+  accuracy: number;
+  result: "win" | "loss" | "draw";
+}
+
 export interface IBattle {
-  player1Id: Types.ObjectId;
-  player2Id: Types.ObjectId;
+  battleRoomId: string;
   questionPaperId: Types.ObjectId;
-  winnerId: Types.ObjectId;
+  participants: IBattleParticipant[];
+  winner: Types.ObjectId | null; // null for draw
+  isDraw: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }

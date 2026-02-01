@@ -1,0 +1,21 @@
+import { Request, Response } from "express";
+import { battleServices } from "./battle.service";
+import catchAsync from "../../utils/catchAsync";
+import { responseManager } from "../../utils/responseManager";
+import httpStatus from "http-status";
+
+const getMyHistory = catchAsync(async (req: Request, res: Response) => {
+    const userId = req.user.userId;
+    const result = await battleServices.getBattleHistory(userId);
+
+    responseManager.success(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Battle history retrieved successfully",
+        data: result,
+    });
+});
+
+export const battleController = {
+    getMyHistory,
+};

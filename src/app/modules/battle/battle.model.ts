@@ -1,34 +1,34 @@
-import { model, Schema } from "mongoose";
-import { IBattle } from "./battle.interface";
+import { Schema, model } from "mongoose";
+import { IBattle, IBattleParticipant } from "./battle.interface";
+export { IBattle, IBattleParticipant };
+
+const battleParticipantSchema = new Schema<IBattleParticipant>(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    score: { type: Number, required: true },
+    accuracy: { type: Number, required: true },
+    result: {
+      type: String,
+      enum: ["win", "loss", "draw"],
+      required: true,
+    },
+  },
+  { _id: false },
+);
 
 const battleSchema = new Schema<IBattle>(
   {
-    player1Id: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    player2Id: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+    battleRoomId: { type: String, required: true },
     questionPaperId: {
       type: Schema.Types.ObjectId,
       ref: "QuestionPaper",
       required: true,
     },
-    winnerId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: false,
-    },
+    participants: [battleParticipantSchema],
+    winner: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    isDraw: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false },
 );
-
-battleSchema.index({ player1Id: 1, player2Id: 1 });
-battleSchema.index({ questionPaperId: 1 });
-battleSchema.index({ winnerId: 1 });
 
 export const Battle = model<IBattle>("Battle", battleSchema);

@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import { envVars } from "../../config/env";
+import { battleServices } from "./battle.service";
 
 export const initWebSocket = (httpServer: any) => {
   const io = new Server(httpServer, {
@@ -156,12 +157,52 @@ export const initWebSocket = (httpServer: any) => {
 
     socket.on(
       "submit_answer",
-      (data: { battleRoomId: string; userId: string; progress: any }) => {
-        console.log(
-          `>>>> SOCKET: Progress update from ${data.userId} in room ${data.battleRoomId}`,
-          data.progress,
-        );
+      async (data: {
+        battleRoomId: string;
+        userId: string;
+        progress: any;
+        questionPaperId?: string; // Add this to payload in frontend
+      }) => {
         socket.to(data.battleRoomId).emit("opponent_progress", data);
+
+        // Check if battle needs to be saved
+        // We need a way to track if BOTH have finished.
+        // For simplicity, let's track finish state in memory or just check progress
+        if (data.progress.left === 0) {
+          // One player finished.
+          // In a real app, we might wait for both.
+          // But to persist, we can check if we have data for both.
+
+          // Better approach for now:
+          // When a client detects "Battle Over" (both left=0),
+          // one of them (or both) can emit "battle_concluded" event to save it.
+          // Or we can track it here.
+        }
+      },
+    );
+
+    socket.on(
+      "battle_concluded",
+      async (data: {
+        battleRoomId: string;
+        questionPaperId: string;
+        participants: {
+          userId: string;
+          score: number;
+          accuracy: number;
+        }[];
+      }) => {
+        try {
+          // Check if already saved? (Optional optimization)
+          await battleServices.createBattleResult(
+            data.battleRoomId,
+            data.questionPaperId,
+            data.participants,
+          );
+          console.log(`>>>> BATTLE SAVED: ${data.battleRoomId}`);
+        } catch (error) {
+          console.error("Error saving battle:", error);
+        }
       },
     );
 

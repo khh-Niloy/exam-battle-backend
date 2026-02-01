@@ -32,3 +32,9 @@
 25. [FIX] Resolved React state update error in `QuestionPaperModal` by wrapping `onSelect` in `useEffect`.
 26. [NEW] Implemented `BattleResultModal` with "Show Explanation" and "Back to Lobby" options.
 27. [UPDATE] Updated `BattlePage` logic to wait for both players to finish before showing results.
+28. [FIX] Added persistent "Back to Lobby" button in `BattlePage` for explanation view.
+29. [BACKEND] Implemented `Battle` model, `BattleController`, and History API (`GET /battles/history`).
+30. [BACKEND] Updated `battle.websocket.ts` to persist battle results to MongoDB upon completion.
+31. [FRONTEND] Implemented `BottomNav` component for floating navigation.
+32. [FRONTEND] Created `ProfilePage` (`/profile`) and `HistoryPage` (`/history`).
+33. [UPDATE] Pushed all changes (Backend & Frontend) to `dev-os`.

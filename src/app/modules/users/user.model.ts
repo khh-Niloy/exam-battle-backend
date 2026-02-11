@@ -36,6 +36,28 @@ const userSchema = new Schema<IUser>(
       ],
       trim: true,
     },
+    image: {
+      type: String,
+      required: false,
+    },
+    uniqueNameCode: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    friends: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    friendRequests: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     studentInfo: {
       instituteName: {
         type: String,

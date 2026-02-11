@@ -36,7 +36,44 @@ const getSingleQuestionPaper = async (req: Request, res: Response) => {
   }
 };
 
+const getMyQuestionPapers = async (req: Request, res: Response) => {
+  try {
+    const creatorId = req.user.userId;
+    const result = await questionPaperService.getMyQuestionPapers(creatorId);
+    responseManager.success(res, {
+      statusCode: 200,
+      success: true,
+      message: "My question papers fetched successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    logger.error(error);
+    responseManager.error(res, error as Error, 400);
+  }
+};
+
+const createQuestionPaper = async (req: Request, res: Response) => {
+  try {
+    const creatorId = req.user.userId;
+    const result = await questionPaperService.createQuestionPaper({
+      ...req.body,
+      creatorId,
+    });
+    responseManager.success(res, {
+      statusCode: 201,
+      success: true,
+      message: "Question paper created successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    logger.error(error);
+    responseManager.error(res, error as Error, 400);
+  }
+};
+
 export const questionPaperController = {
   getAllQuestionPapers,
   getSingleQuestionPaper,
+  getMyQuestionPapers,
+  createQuestionPaper,
 };

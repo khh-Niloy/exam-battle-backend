@@ -5,7 +5,7 @@ import { battleServices } from "./battle.service";
 export const initWebSocket = (httpServer: any) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: envVars.CORS_FRONTEND_URL,
+      origin: [envVars.CORS_FRONTEND_URL, "http://192.168.31.67:3000"],
       credentials: true,
     },
   });
@@ -172,7 +172,6 @@ export const initWebSocket = (httpServer: any) => {
           // One player finished.
           // In a real app, we might wait for both.
           // But to persist, we can check if we have data for both.
-
           // Better approach for now:
           // When a client detects "Battle Over" (both left=0),
           // one of them (or both) can emit "battle_concluded" event to save it.

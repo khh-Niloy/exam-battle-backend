@@ -15,6 +15,11 @@ const questionPaperSchema = new Schema<IQuestionPaper>(
       trim: true,
       maxlength: 200,
     },
+    creatorId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true, versionKey: false },
 );

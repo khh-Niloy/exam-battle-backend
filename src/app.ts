@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 
 app.use(
   cors({
-    origin: envVars.CORS_FRONTEND_URL,
+    origin: [envVars.CORS_FRONTEND_URL, "http://192.168.31.67:3000"],
     credentials: true,
   }),
 );

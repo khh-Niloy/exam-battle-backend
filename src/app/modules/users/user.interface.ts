@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 export enum Roles {
   FREE = "FREE",
   PREMIUM = "PREMIUM",
@@ -18,6 +20,9 @@ export interface IUser {
   password: string;
   role: Roles;
   image?: string;
+  uniqueNameCode: string;
+  friends: Types.ObjectId[];
+  friendRequests: Types.ObjectId[];
   studentInfo?: {
     instituteName: string;
     group: StudentGroup;

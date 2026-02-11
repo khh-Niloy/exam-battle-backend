@@ -47,8 +47,16 @@ const getNewAccessTokenService = async (refreshToken: string) => {
 
 const getMeService = async (payload: JwtPayload) => {
   const user = await User.findById(payload.userId).select(
-    "_id name email role phone studentInfo image",
+    "_id name email role phone studentInfo image uniqueNameCode",
   );
+
+  if (user && !user.uniqueNameCode) {
+    const cleanName = user.name.replace(/\s+/g, "").toUpperCase().slice(0, 6);
+    const randomDigits = Math.floor(1000 + Math.random() * 9000);
+    user.uniqueNameCode = `${cleanName}#${randomDigits}`;
+    await user.save();
+  }
+
   return user;
 };
 

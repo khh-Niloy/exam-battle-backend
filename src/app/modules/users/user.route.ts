@@ -21,5 +21,30 @@ userRoutes.get(
 userRoutes.get(
   "/friends",
   roleBasedProtection(...Object.values(Roles)),
-  userController.getOtherUsers,
+  userController.getFriends,
+);
+userRoutes.get(
+  "/search/:code",
+  roleBasedProtection(...Object.values(Roles)),
+  userController.searchUser,
+);
+userRoutes.post(
+  "/friend-request/send",
+  roleBasedProtection(...Object.values(Roles)),
+  userController.sendFriendRequest,
+);
+userRoutes.get(
+  "/friend-request/pending",
+  roleBasedProtection(...Object.values(Roles)),
+  userController.getPendingRequests,
+);
+userRoutes.post(
+  "/friend-request/accept",
+  roleBasedProtection(...Object.values(Roles)),
+  userController.acceptFriendRequest,
+);
+userRoutes.post(
+  "/friend-request/reject",
+  roleBasedProtection(...Object.values(Roles)),
+  userController.rejectFriendRequest,
 );

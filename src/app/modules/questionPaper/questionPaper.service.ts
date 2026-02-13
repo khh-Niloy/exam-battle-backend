@@ -3,7 +3,9 @@ import { Question } from "../question/question.model";
 import { QuestionPaper } from "./questionPaper.model";
 
 const getAllQuestionPapers = async () => {
-  return await QuestionPaper.find().populate("questionIds");
+  return await QuestionPaper.find()
+    .populate("questionIds")
+    .populate("creatorId");
 };
 
 const getSingleQuestionPaper = async (id: string) => {

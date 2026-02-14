@@ -209,6 +209,28 @@ export const initWebSocket = (httpServer: any) => {
       updateUserStatus(data.userId, "AVAILABLE");
     });
 
+    // Chat Logic
+    socket.on("join_room", (roomId: string) => {
+      socket.join(roomId);
+      console.log(`Socket ${socket.id} joined room: ${roomId}`);
+    });
+
+    socket.on(
+      "send_message",
+      (data: {
+        roomId: string;
+        message: string;
+        senderId: string;
+        senderName: string;
+        senderImage?: string;
+      }) => {
+        io.to(data.roomId).emit("receive_message", {
+          ...data,
+          timestamp: new Date().toISOString(),
+        });
+      },
+    );
+
     socket.on("disconnect", () => {
       const userId = socketUserMap.get(socket.id);
       if (userId) {

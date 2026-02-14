@@ -122,6 +122,20 @@ const removeParticipant = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const leaveWar = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.userId;
+  const { warId } = req.params;
+
+  const result = await warServices.leaveWar(userId, warId as string);
+
+  responseManager.success(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Left the war successfully",
+    data: result,
+  });
+});
+
 export const warController = {
   createWar,
   joinWar,
@@ -131,4 +145,5 @@ export const warController = {
   getMyJoinedWars,
   cancelWar,
   removeParticipant,
+  leaveWar,
 };

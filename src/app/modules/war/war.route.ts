@@ -40,6 +40,62 @@ router.post(
 );
 
 /**
+ * GET /api/wars/my/created
+ * Get wars created by current admin
+ */
+router.get(
+  "/my/created",
+  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
+  warController.getMyCreatedWars,
+);
+
+/**
+ * GET /api/wars/my/joined
+ * Get wars joined by current user
+ */
+router.get(
+  "/my/joined",
+  roleBasedProtection(
+    Roles.FREE,
+    Roles.PREMIUM,
+    Roles.ADMIN,
+    Roles.SUPER_ADMIN,
+  ),
+  warController.getMyJoinedWars,
+);
+
+/**
+ * DELETE /api/wars/:warId/leave
+ * Leave a war (All authenticated users - enforced in service)
+ */
+router.delete(
+  "/:warId/leave",
+  roleBasedProtection(
+    Roles.FREE,
+    Roles.PREMIUM,
+    Roles.ADMIN,
+    Roles.SUPER_ADMIN,
+  ),
+  warController.leaveWar,
+);
+
+/**
+ * GET /api/wars/:warId
+ * Get war details (All authenticated users)
+ */
+router.get(
+  "/:warId",
+  roleBasedProtection(
+    Roles.FREE,
+    Roles.PREMIUM,
+    Roles.ADMIN,
+    Roles.SUPER_ADMIN,
+  ),
+  validateRequest(getWarDetailsSchema),
+  warController.getWarDetails,
+);
+
+/**
  * PATCH /api/wars/:warId/start
  * Start a war (Admin creator only - enforced in service)
  */
@@ -68,47 +124,6 @@ router.delete(
   "/:warId/participants/:userId",
   roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
   warController.removeParticipant,
-);
-
-/**
- * GET /api/wars/:warId
- * Get war details (All authenticated users)
- */
-router.get(
-  "/:warId",
-  roleBasedProtection(
-    Roles.FREE,
-    Roles.PREMIUM,
-    Roles.ADMIN,
-    Roles.SUPER_ADMIN,
-  ),
-  validateRequest(getWarDetailsSchema),
-  warController.getWarDetails,
-);
-
-/**
- * GET /api/wars/my/created
- * Get wars created by current admin
- */
-router.get(
-  "/my/created",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
-  warController.getMyCreatedWars,
-);
-
-/**
- * GET /api/wars/my/joined
- * Get wars joined by current user
- */
-router.get(
-  "/my/joined",
-  roleBasedProtection(
-    Roles.FREE,
-    Roles.PREMIUM,
-    Roles.ADMIN,
-    Roles.SUPER_ADMIN,
-  ),
-  warController.getMyJoinedWars,
 );
 
 export const WarRoutes = router;

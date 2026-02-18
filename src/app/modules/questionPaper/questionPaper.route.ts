@@ -8,12 +8,12 @@ const router = Router();
 router.get("/", questionPaperController.getAllQuestionPapers);
 router.get(
   "/my-papers",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
   questionPaperController.getMyQuestionPapers,
 );
 router.post(
   "/create",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
   questionPaperController.createQuestionPaper,
 );
 router.get("/:id", questionPaperController.getSingleQuestionPaper);

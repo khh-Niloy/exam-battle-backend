@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get(
   "/history",
-  roleBasedProtection(Roles.FREE, Roles.PREMIUM, Roles.ADMIN),
+  roleBasedProtection(Roles.FREE, Roles.PREMIUM, Roles.COACHING),
   battleController.getMyHistory,
 );
 

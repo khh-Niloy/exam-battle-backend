@@ -18,7 +18,7 @@ const router = express.Router();
  */
 router.post(
   "/",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
   validateRequest(createWarSchema),
   warController.createWar,
 );
@@ -32,7 +32,7 @@ router.post(
   roleBasedProtection(
     Roles.FREE,
     Roles.PREMIUM,
-    Roles.ADMIN,
+    Roles.COACHING,
     Roles.SUPER_ADMIN,
   ),
   validateRequest(joinWarSchema),
@@ -45,7 +45,7 @@ router.post(
  */
 router.get(
   "/my/created",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
   warController.getMyCreatedWars,
 );
 
@@ -58,7 +58,7 @@ router.get(
   roleBasedProtection(
     Roles.FREE,
     Roles.PREMIUM,
-    Roles.ADMIN,
+    Roles.COACHING,
     Roles.SUPER_ADMIN,
   ),
   warController.getMyJoinedWars,
@@ -73,7 +73,7 @@ router.delete(
   roleBasedProtection(
     Roles.FREE,
     Roles.PREMIUM,
-    Roles.ADMIN,
+    Roles.COACHING,
     Roles.SUPER_ADMIN,
   ),
   warController.leaveWar,
@@ -88,7 +88,7 @@ router.get(
   roleBasedProtection(
     Roles.FREE,
     Roles.PREMIUM,
-    Roles.ADMIN,
+    Roles.COACHING,
     Roles.SUPER_ADMIN,
   ),
   validateRequest(getWarDetailsSchema),
@@ -101,7 +101,7 @@ router.get(
  */
 router.patch(
   "/:warId/start",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
   validateRequest(startWarSchema),
   warController.startWar,
 );
@@ -112,7 +112,7 @@ router.patch(
  */
 router.patch(
   "/:warId/cancel",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
   warController.cancelWar,
 );
 
@@ -122,7 +122,7 @@ router.patch(
  */
 router.delete(
   "/:warId/participants/:userId",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
   warController.removeParticipant,
 );
 

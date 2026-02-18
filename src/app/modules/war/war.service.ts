@@ -5,17 +5,7 @@ import { User } from "../users/user.model";
 import { WarStatus } from "./war.interface";
 import { generateWarId, isWarExpired } from "./war.utils";
 import httpStatus from "http-status";
-
-class AppError extends Error {
-  statusCode: number;
-  constructor(statusCode: number, message: string) {
-    super(message);
-    this.statusCode = statusCode;
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
-    }
-  }
-}
+import AppError from "../../errors/AppError";
 
 /**
  * Creates a new War (Admin only)

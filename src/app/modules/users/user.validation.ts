@@ -15,7 +15,7 @@ export const userCreateZodSchema = z.object({
     email: z.string().email("Invalid email format").toLowerCase().trim(),
     password: z.string().max(128, "Password must be less than 128 characters"),
     role: z.nativeEnum(Roles, {
-      error: "Invalid role. Must be TOURIST, GUIDE, or ADMIN",
+      error: "Invalid role.",
     }),
   }),
 });

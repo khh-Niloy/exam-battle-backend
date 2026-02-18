@@ -1,18 +1,17 @@
 import { Request, Response } from "express";
-import { warServices } from "./war.service";
+import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import { responseManager } from "../../utils/responseManager";
-import httpStatus from "http-status";
+import { warServices } from "./war.service";
 
 const createWar = catchAsync(async (req: Request, res: Response) => {
-  const creatorId = req.user.userId;
+  const user = (req as any).user;
   const { questionPaperId, maxPlayers, scheduledStartTime } = req.body;
-
   const result = await warServices.createWar(
-    creatorId,
+    user.userId,
     questionPaperId,
     maxPlayers,
-    new Date(scheduledStartTime),
+    scheduledStartTime,
   );
 
   responseManager.success(res, {
@@ -24,24 +23,22 @@ const createWar = catchAsync(async (req: Request, res: Response) => {
 });
 
 const joinWar = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user.userId;
+  const user = (req as any).user;
   const { warId } = req.body;
-
-  const result = await warServices.joinWar(userId, warId);
+  const result = await warServices.joinWar(user.userId, warId);
 
   responseManager.success(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Successfully joined the war",
+    message: "Joined war successfully",
     data: result,
   });
 });
 
 const startWar = catchAsync(async (req: Request, res: Response) => {
-  const creatorId = req.user.userId;
+  const user = (req as any).user;
   const { warId } = req.params;
-
-  const result = await warServices.startWar(creatorId, warId as string);
+  const result = await warServices.startWar(user.userId, warId as string);
 
   responseManager.success(res, {
     statusCode: httpStatus.OK,
@@ -53,7 +50,6 @@ const startWar = catchAsync(async (req: Request, res: Response) => {
 
 const getWarDetails = catchAsync(async (req: Request, res: Response) => {
   const { warId } = req.params;
-
   const result = await warServices.getWarDetails(warId as string);
 
   responseManager.success(res, {
@@ -65,36 +61,33 @@ const getWarDetails = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMyCreatedWars = catchAsync(async (req: Request, res: Response) => {
-  const creatorId = req.user.userId;
-
-  const result = await warServices.getMyCreatedWars(creatorId);
+  const user = (req as any).user;
+  const result = await warServices.getMyCreatedWars(user.userId);
 
   responseManager.success(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Created wars retrieved successfully",
+    message: "My created wars retrieved successfully",
     data: result,
   });
 });
 
 const getMyJoinedWars = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user.userId;
-
-  const result = await warServices.getMyJoinedWars(userId);
+  const user = (req as any).user;
+  const result = await warServices.getMyJoinedWars(user.userId);
 
   responseManager.success(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Joined wars retrieved successfully",
+    message: "My joined wars retrieved successfully",
     data: result,
   });
 });
 
 const cancelWar = catchAsync(async (req: Request, res: Response) => {
-  const creatorId = req.user.userId;
+  const user = (req as any).user;
   const { warId } = req.params;
-
-  const result = await warServices.cancelWar(creatorId, warId as string);
+  const result = await warServices.cancelWar(user.userId, warId as string);
 
   responseManager.success(res, {
     statusCode: httpStatus.OK,
@@ -105,11 +98,10 @@ const cancelWar = catchAsync(async (req: Request, res: Response) => {
 });
 
 const removeParticipant = catchAsync(async (req: Request, res: Response) => {
-  const creatorId = req.user.userId;
+  const user = (req as any).user;
   const { warId, userId } = req.params;
-
   const result = await warServices.removeParticipant(
-    creatorId,
+    user.userId,
     warId as string,
     userId as string,
   );
@@ -123,15 +115,14 @@ const removeParticipant = catchAsync(async (req: Request, res: Response) => {
 });
 
 const leaveWar = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user.userId;
+  const user = (req as any).user;
   const { warId } = req.params;
-
-  const result = await warServices.leaveWar(userId, warId as string);
+  const result = await warServices.leaveWar(user.userId, warId as string);
 
   responseManager.success(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Left the war successfully",
+    message: "Left war successfully",
     data: result,
   });
 });

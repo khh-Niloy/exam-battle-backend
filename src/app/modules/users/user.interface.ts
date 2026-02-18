@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 export enum Roles {
   FREE = "FREE",
   PREMIUM = "PREMIUM",
-  ADMIN = "ADMIN",
+  COACHING = "COACHING",
   SUPER_ADMIN = "SUPER_ADMIN",
 }
 

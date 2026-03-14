@@ -5,15 +5,21 @@ import { notFound } from "./app/middleware/notFound";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { routes } from "./routes";
 import { envVars } from "./app/config/env";
+import { logger } from "./app/utils/logger";
 
 export const app = express();
 
 app.use(cookieParser());
 app.use(express.json());
 
-// Request logger for debugging
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  const start = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    logger.log(
+      `[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms`,
+    );
+  });
   next();
 });
 

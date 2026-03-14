@@ -73,6 +73,11 @@ const userSchema = new Schema<IUser>(
         required: false,
       },
     },
+    status: {
+      type: String,
+      enum: ["active", "blocked"],
+      default: "active",
+    },
   },
   { timestamps: true, versionKey: false },
 );

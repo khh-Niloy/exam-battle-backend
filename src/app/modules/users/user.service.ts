@@ -181,6 +181,22 @@ const getFriendsService = async (userId: string) => {
   return user?.friends || [];
 };
 
+const getAllUsersService = async (role?: Roles) => {
+  const query = role ? { role } : {};
+  return await User.find(query).select("+status");
+};
+
+const toggleUserBlockStatusService = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  user.status = user.status === "blocked" ? "active" : "blocked";
+  await user.save();
+  return user;
+};
+
 export const userServices = {
   createUserService,
   getProfileService,
@@ -190,4 +206,6 @@ export const userServices = {
   getPendingRequestsService,
   acceptFriendRequestService,
   rejectFriendRequestService,
+  getAllUsersService,
+  toggleUserBlockStatusService,
 };

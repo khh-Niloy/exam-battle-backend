@@ -9,6 +9,7 @@ import {
   startWarSchema,
   getWarDetailsSchema,
 } from "./war.validation";
+import { cacheMiddleware } from "../../lib/cache";
 
 const router = express.Router();
 
@@ -46,6 +47,13 @@ router.post(
 router.get(
   "/my/created",
   roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
+  cacheMiddleware(
+    (req) => {
+      const userId = (req as any).user?.userId;
+      return userId ? `wars:created:${userId}` : null;
+    },
+    30,
+  ),
   warController.getMyCreatedWars,
 );
 
@@ -60,6 +68,13 @@ router.get(
     Roles.PREMIUM,
     Roles.COACHING,
     Roles.SUPER_ADMIN,
+  ),
+  cacheMiddleware(
+    (req) => {
+      const userId = (req as any).user?.userId;
+      return userId ? `wars:joined:${userId}` : null;
+    },
+    30,
   ),
   warController.getMyJoinedWars,
 );
@@ -92,6 +107,10 @@ router.get(
     Roles.SUPER_ADMIN,
   ),
   validateRequest(getWarDetailsSchema),
+  cacheMiddleware(
+    (req) => (req.params.warId ? `war:details:${req.params.warId}` : null),
+    15,
+  ),
   warController.getWarDetails,
 );
 

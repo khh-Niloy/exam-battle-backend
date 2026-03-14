@@ -28,4 +28,5 @@ export interface IUser {
     group: StudentGroup;
     class: string;
   };
+  status: "active" | "blocked";
 }

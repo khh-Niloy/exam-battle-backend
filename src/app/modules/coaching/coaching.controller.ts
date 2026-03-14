@@ -57,9 +57,34 @@ const removeStudent = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllCoachings = catchAsync(async (req: Request, res: Response) => {
+  const result = await CoachingService.getAllCoachings();
+
+  responseManager.success(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Coachings retrieved successfully",
+    data: result,
+  });
+});
+
+const deleteCoaching = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await CoachingService.deleteCoaching(id as string);
+
+  responseManager.success(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Coaching deleted successfully",
+    data: result,
+  });
+});
+
 export const CoachingController = {
   createCoaching,
   joinCoaching,
   getMyCoaching,
   removeStudent,
+  getAllCoachings,
+  deleteCoaching,
 };

@@ -4,6 +4,7 @@ import { ICoaching } from "./coaching.interface";
 import { Coaching } from "./coaching.model";
 import { Types } from "mongoose";
 import { User } from "../users/user.model";
+import { War } from "../war/war.model";
 
 const createCoaching = async (
   ownerId: string,
@@ -114,10 +115,40 @@ const removeStudent = async (
   return coaching;
 };
 
+const getAllCoachings = async () => {
+  const coachings = await Coaching.find().populate("ownerId", "name email");
+
+  // Enhance with counts
+  const enhancedCoachings = await Promise.all(
+    coachings.map(async (coaching) => {
+      const warCount = await War.countDocuments({
+        creatorId: coaching.ownerId,
+      });
+      return {
+        ...coaching.toObject(),
+        totalStudents: coaching.students.length,
+        totalExams: warCount,
+      };
+    }),
+  );
+
+  return enhancedCoachings;
+};
+
+const deleteCoaching = async (id: string) => {
+  const coaching = await Coaching.findByIdAndDelete(id);
+  if (!coaching) {
+    throw new AppError(httpStatus.NOT_FOUND, "Coaching not found");
+  }
+  return coaching;
+};
+
 export const CoachingService = {
   createCoaching,
   joinCoaching,
   getMyCoaching,
   getCoachingById,
   removeStudent,
+  getAllCoachings,
+  deleteCoaching,
 };

@@ -48,3 +48,16 @@ userRoutes.post(
   roleBasedProtection(...Object.values(Roles)),
   userController.rejectFriendRequest,
 );
+
+// Admin routes
+userRoutes.get(
+  "/all",
+  roleBasedProtection(Roles.SUPER_ADMIN),
+  userController.getAllUsers,
+);
+
+userRoutes.patch(
+  "/toggle-block/:userId",
+  roleBasedProtection(Roles.SUPER_ADMIN),
+  userController.toggleUserBlockStatus,
+);

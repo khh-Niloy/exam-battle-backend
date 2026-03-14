@@ -32,3 +32,16 @@ coachingRoutes.delete(
   roleBasedProtection(Roles.COACHING),
   CoachingController.removeStudent,
 );
+
+// Admin routes
+coachingRoutes.get(
+  "/all",
+  roleBasedProtection(Roles.SUPER_ADMIN),
+  CoachingController.getAllCoachings,
+);
+
+coachingRoutes.delete(
+  "/:id",
+  roleBasedProtection(Roles.SUPER_ADMIN),
+  CoachingController.deleteCoaching,
+);

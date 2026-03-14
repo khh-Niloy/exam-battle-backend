@@ -33,6 +33,10 @@ export const roleBasedProtection =
       throw new Error("You are not permitted to view this route!!!");
     }
 
+    if (user.status === "blocked") {
+      throw new Error("Your account has been blocked. Please contact support.");
+    }
+
     req.user = userInfoJWTAccessToken;
 
     next();

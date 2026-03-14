@@ -1,17 +1,11 @@
 import { Types } from "mongoose";
 import { War } from "./war.model";
 import { QuestionPaper } from "../questionPaper/questionPaper.model";
+import { User } from "../users/user.model";
 import { WarStatus } from "./war.interface";
 import { generateWarId, isWarExpired } from "./war.utils";
 import httpStatus from "http-status";
-
-class AppError extends Error {
-  statusCode: number;
-  constructor(statusCode: number, message: string) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-}
+import AppError from "../../errors/AppError";
 
 /**
  * Creates a new War (Admin only)
@@ -207,16 +201,21 @@ const startWar = async (creatorId: string, warId: string) => {
  * Get War details with real-time participant list
  */
 const getWarDetails = async (warId: string) => {
-  const war = await War.findOne({ warId })
-    .populate("questionPaperId", "examName")
-    .populate("participants.userId", "name image")
-    .populate("creatorId", "name");
+  try {
+    const war = await War.findOne({ warId })
+      .populate("questionPaperId", "examName")
+      .populate("participants.userId", "name image")
+      .populate("creatorId", "name");
 
-  if (!war) {
-    throw new AppError(httpStatus.NOT_FOUND, "War not found");
+    if (!war) {
+      throw new AppError(404, "War not found");
+    }
+
+    return war;
+  } catch (error: any) {
+    if (error instanceof AppError) throw error;
+    throw new AppError(500, `Error fetching war details: ${error.message}`);
   }
-
-  return war;
 };
 
 /**
@@ -341,6 +340,60 @@ const removeParticipant = async (
   return updatedWar;
 };
 
+/**
+ * Leave a war (User action)
+ * - User can leave if they are a participant
+ * - Creator cannot leave (they must cancel/delete the war)
+ * - Can only leave WAITING wars
+ */
+const leaveWar = async (userId: string, warId: string) => {
+  const war = await War.findOne({ warId });
+
+  if (!war) {
+    throw new AppError(httpStatus.NOT_FOUND, "War not found");
+  }
+
+  // Creator cannot leave via this method
+  if (war.creatorId.toString() === userId) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Creator cannot leave the war. Use Cancel War instead.",
+    );
+  }
+
+  // check if user is in participant list
+  const isParticipant = war.participants.some(
+    (p) => p.userId.toString() === userId,
+  );
+  if (!isParticipant) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "You are not a participant in this war",
+    );
+  }
+
+  // State validation
+  if (war.status !== WarStatus.WAITING) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Cannot leave war. Current status: ${war.status}`,
+    );
+  }
+
+  const updatedWar = await War.findOneAndUpdate(
+    { warId },
+    {
+      $pull: {
+        participants: { userId: new Types.ObjectId(userId) },
+      },
+      $inc: { version: 1 },
+    },
+    { new: true },
+  ).populate("participants.userId", "name image");
+
+  return updatedWar;
+};
+
 export const warServices = {
   createWar,
   joinWar,
@@ -350,4 +403,5 @@ export const warServices = {
   getMyJoinedWars,
   cancelWar,
   removeParticipant,
+  leaveWar,
 };

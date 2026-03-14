@@ -9,6 +9,7 @@ import {
   startWarSchema,
   getWarDetailsSchema,
 } from "./war.validation";
+import { cacheMiddleware } from "../../lib/cache";
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ const router = express.Router();
  */
 router.post(
   "/",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
   validateRequest(createWarSchema),
   warController.createWar,
 );
@@ -32,58 +33,11 @@ router.post(
   roleBasedProtection(
     Roles.FREE,
     Roles.PREMIUM,
-    Roles.ADMIN,
+    Roles.COACHING,
     Roles.SUPER_ADMIN,
   ),
   validateRequest(joinWarSchema),
   warController.joinWar,
-);
-
-/**
- * PATCH /api/wars/:warId/start
- * Start a war (Admin creator only - enforced in service)
- */
-router.patch(
-  "/:warId/start",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
-  validateRequest(startWarSchema),
-  warController.startWar,
-);
-
-/**
- * PATCH /api/wars/:warId/cancel
- * Cancel a war (Admin creator only - enforced in service)
- */
-router.patch(
-  "/:warId/cancel",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
-  warController.cancelWar,
-);
-
-/**
- * DELETE /api/wars/:warId/participants/:userId
- * Remove a participant from a war (Admin creator only - enforced in service)
- */
-router.delete(
-  "/:warId/participants/:userId",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
-  warController.removeParticipant,
-);
-
-/**
- * GET /api/wars/:warId
- * Get war details (All authenticated users)
- */
-router.get(
-  "/:warId",
-  roleBasedProtection(
-    Roles.FREE,
-    Roles.PREMIUM,
-    Roles.ADMIN,
-    Roles.SUPER_ADMIN,
-  ),
-  validateRequest(getWarDetailsSchema),
-  warController.getWarDetails,
 );
 
 /**
@@ -92,7 +46,14 @@ router.get(
  */
 router.get(
   "/my/created",
-  roleBasedProtection(Roles.ADMIN, Roles.SUPER_ADMIN),
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
+  cacheMiddleware(
+    (req) => {
+      const userId = (req as any).user?.userId;
+      return userId ? `wars:created:${userId}` : null;
+    },
+    30,
+  ),
   warController.getMyCreatedWars,
 );
 
@@ -105,10 +66,83 @@ router.get(
   roleBasedProtection(
     Roles.FREE,
     Roles.PREMIUM,
-    Roles.ADMIN,
+    Roles.COACHING,
     Roles.SUPER_ADMIN,
   ),
+  cacheMiddleware(
+    (req) => {
+      const userId = (req as any).user?.userId;
+      return userId ? `wars:joined:${userId}` : null;
+    },
+    30,
+  ),
   warController.getMyJoinedWars,
+);
+
+/**
+ * DELETE /api/wars/:warId/leave
+ * Leave a war (All authenticated users - enforced in service)
+ */
+router.delete(
+  "/:warId/leave",
+  roleBasedProtection(
+    Roles.FREE,
+    Roles.PREMIUM,
+    Roles.COACHING,
+    Roles.SUPER_ADMIN,
+  ),
+  warController.leaveWar,
+);
+
+/**
+ * GET /api/wars/:warId
+ * Get war details (All authenticated users)
+ */
+router.get(
+  "/:warId",
+  roleBasedProtection(
+    Roles.FREE,
+    Roles.PREMIUM,
+    Roles.COACHING,
+    Roles.SUPER_ADMIN,
+  ),
+  validateRequest(getWarDetailsSchema),
+  cacheMiddleware(
+    (req) => (req.params.warId ? `war:details:${req.params.warId}` : null),
+    15,
+  ),
+  warController.getWarDetails,
+);
+
+/**
+ * PATCH /api/wars/:warId/start
+ * Start a war (Admin creator only - enforced in service)
+ */
+router.patch(
+  "/:warId/start",
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
+  validateRequest(startWarSchema),
+  warController.startWar,
+);
+
+/**
+ * PATCH /api/wars/:warId/cancel
+ * Cancel a war (Admin creator only - enforced in service)
+ */
+router.patch(
+  "/:warId/cancel",
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
+  warController.cancelWar,
+);
+
+/**
+ * DELETE /api/wars/:warId/participants/:userId
+ * Remove a participant from a war (Admin creator only - enforced in service)
+ */
+router.delete(
+  "/:warId/participants/:userId",
+  roleBasedProtection(Roles.COACHING, Roles.SUPER_ADMIN),
+  warController.removeParticipant,
 );
 
 export const WarRoutes = router;

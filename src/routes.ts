@@ -4,6 +4,7 @@ import { authRoutes } from "./app/modules/auth/auth.routes";
 import { questionPaperRoutes } from "./app/modules/questionPaper/questionPaper.route";
 import { BattleRoutes } from "./app/modules/battle/battle.route";
 import { WarRoutes } from "./app/modules/war/war.route";
+import { coachingRoutes } from "./app/modules/coaching/coaching.route";
 
 export const routes = Router();
 
@@ -27,6 +28,10 @@ const allRoutes = [
   {
     path: "/wars",
     route: WarRoutes,
+  },
+  {
+    path: "/coaching",
+    route: coachingRoutes,
   },
 ];
 

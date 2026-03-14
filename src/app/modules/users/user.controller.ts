@@ -3,6 +3,7 @@ import { userServices } from "./user.service";
 import { responseManager } from "../../utils/responseManager";
 import { JwtPayload } from "jsonwebtoken";
 import { cookiesManagement } from "../../utils/cookiesManagement";
+import { Roles } from "./user.interface";
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -151,6 +152,38 @@ const rejectFriendRequest = async (req: Request, res: Response) => {
   }
 };
 
+const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const { role } = req.query;
+    const result = await userServices.getAllUsersService(role as Roles);
+    responseManager.success(res, {
+      statusCode: 200,
+      success: true,
+      message: "Users fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    responseManager.error(res, error as Error, 500);
+  }
+};
+
+const toggleUserBlockStatus = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const result = await userServices.toggleUserBlockStatusService(
+      userId as string,
+    );
+    responseManager.success(res, {
+      statusCode: 200,
+      success: true,
+      message: "User status updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    responseManager.error(res, error as Error, 500);
+  }
+};
+
 export const userController = {
   createUser,
   getProfile,
@@ -160,4 +193,6 @@ export const userController = {
   getPendingRequests,
   acceptFriendRequest,
   rejectFriendRequest,
+  getAllUsers,
+  toggleUserBlockStatus,
 };

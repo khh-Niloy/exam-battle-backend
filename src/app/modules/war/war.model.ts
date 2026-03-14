@@ -1,5 +1,7 @@
 import { Schema, model } from "mongoose";
 import { IWar, IWarParticipant, WarStatus } from "./war.interface";
+import "../users/user.model";
+import "../questionPaper/questionPaper.model";
 
 const warParticipantSchema = new Schema<IWarParticipant>(
   {

@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import { envVars } from "../../config/env";
 import { battleServices } from "./battle.service";
+import { getRedisClient } from "../../lib/redisClient";
 
 export const initWebSocket = (httpServer: any) => {
   const io = new Server(httpServer, {
@@ -18,6 +19,63 @@ export const initWebSocket = (httpServer: any) => {
     "AVAILABLE" | "IN_LOBBY" | "IN_BATTLE"
   >();
 
+  const redis = getRedisClient();
+
+  // Live visitors (real-time "who is online now")
+  // We track active sockets in a Redis ZSET with last-seen timestamps.
+  // This is resilient to missing disconnects (tab crash / network drop) by expiring stale entries.
+  const VISITOR_ZSET_KEY = "visitors:online_sockets";
+  const VISITOR_STALE_AFTER_MS = 30_000; // if no heartbeat within 30s, consider offline
+  const VISITOR_SWEEP_EVERY_MS = 10_000;
+
+  const emitVisitorCount = async () => {
+    try {
+      const count = await redis.zcard(VISITOR_ZSET_KEY);
+      io.emit("visitor_count", { count });
+    } catch (err) {
+      console.error("Redis visitor_count emit error:", err);
+    }
+  };
+
+  const markVisitorSeen = async (socketId: string) => {
+    const now = Date.now();
+    try {
+      await redis.zadd(VISITOR_ZSET_KEY, now, socketId);
+    } catch (err) {
+      console.error("Redis visitor seen error:", err);
+    }
+  };
+
+  const removeVisitor = async (socketId: string) => {
+    try {
+      await redis.zrem(VISITOR_ZSET_KEY, socketId);
+    } catch (err) {
+      console.error("Redis visitor remove error:", err);
+    }
+  };
+
+  const sweepStaleVisitors = async () => {
+    const cutoff = Date.now() - VISITOR_STALE_AFTER_MS;
+    try {
+      await redis.zremrangebyscore(VISITOR_ZSET_KEY, 0, cutoff);
+      await emitVisitorCount();
+    } catch (err) {
+      console.error("Redis visitor sweep error:", err);
+    }
+  };
+
+  // Periodic cleanup in case disconnect isn't received.
+  setInterval(() => {
+    sweepStaleVisitors().catch(() => {});
+  }, VISITOR_SWEEP_EVERY_MS);
+
+  const messageRateLimit = new Map<
+    string,
+    { lastMessageTs: number; countInWindow: number }
+  >();
+  const MESSAGE_WINDOW_MS = 5000;
+  const MESSAGE_MAX_PER_WINDOW = 20;
+
   const updateUserStatus = (
     userId: string,
     status: "AVAILABLE" | "IN_LOBBY" | "IN_BATTLE",
@@ -27,6 +85,23 @@ export const initWebSocket = (httpServer: any) => {
   };
 
   io.on("connection", (socket) => {
+    // Mark socket online immediately and send count (real-time).
+    markVisitorSeen(socket.id)
+      .then(async () => {
+        // Send current count to everyone (keeps all clients in sync).
+        await emitVisitorCount();
+        // Also send current count to this socket right away.
+        const count = await redis.zcard(VISITOR_ZSET_KEY);
+        socket.emit("visitor_count", { count });
+      })
+      .catch((err) => console.error("Visitor init error:", err));
+
+    // Client heartbeat.
+    socket.on("visitor_ping", async () => {
+      await markVisitorSeen(socket.id);
+      // Don't emit every ping (avoid noise); sweep will broadcast periodically.
+    });
+
     socket.on("join_self", (userId: string) => {
       socket.join(userId);
 
@@ -209,7 +284,47 @@ export const initWebSocket = (httpServer: any) => {
       updateUserStatus(data.userId, "AVAILABLE");
     });
 
+    // Chat Logic
+    socket.on("join_room", (roomId: string) => {
+      socket.join(roomId);
+      console.log(`Socket ${socket.id} joined room: ${roomId}`);
+    });
+
+    socket.on(
+      "send_message",
+      (data: {
+        roomId: string;
+        message: string;
+        senderId: string;
+        senderName: string;
+        senderImage?: string;
+      }) => {
+        const now = Date.now();
+        const key = socket.id;
+        const existing = messageRateLimit.get(key);
+        if (!existing || now - existing.lastMessageTs > MESSAGE_WINDOW_MS) {
+          messageRateLimit.set(key, {
+            lastMessageTs: now,
+            countInWindow: 1,
+          });
+        } else {
+          if (existing.countInWindow >= MESSAGE_MAX_PER_WINDOW) {
+            return;
+          }
+          existing.countInWindow += 1;
+          existing.lastMessageTs = now;
+          messageRateLimit.set(key, existing);
+        }
+
+        io.to(data.roomId).emit("receive_message", {
+          ...data,
+          timestamp: new Date().toISOString(),
+        });
+      },
+    );
+
     socket.on("disconnect", () => {
+      messageRateLimit.delete(socket.id);
       const userId = socketUserMap.get(socket.id);
       if (userId) {
         socketUserMap.delete(socket.id);
@@ -223,6 +338,12 @@ export const initWebSocket = (httpServer: any) => {
           }
         }
       }
+
+      removeVisitor(socket.id)
+        .then(async () => {
+          await emitVisitorCount();
+        })
+        .catch((err) => console.error("Visitor remove error:", err));
     });
   });
 
